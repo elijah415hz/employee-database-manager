@@ -15,12 +15,6 @@ INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES("John", 
 INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES("Jim", "Bob", 5, 3);
 INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES("Jim", "Bean", 6, 4);
 
--- WITH managers AS (
---     SELECT A.id, B.first_name AS manager_first, B.last_name AS manager_last
---     FROM employee A
---     JOIN employee B ON A.id = 
---     WHERE A.id <> B.id
--- )
 
 SELECT name, title, salary, employee.first_name AS first_name, employee.last_name AS last_name, managers.first_name AS manager_first, managers.last_name AS manager_last
 FROM department
