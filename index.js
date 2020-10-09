@@ -2,13 +2,13 @@
     // View all Employees *
     // View Employees by department *
     // View Employees by roles *
-    // Add Employee 
-    // Add department
-    // Add role
+    // Add Employee *?
+    // Add Department *
+    // Add role *
     // Bonus:
-    // Update Manager by employee
-    // View employees by manager
-    // Delete department
+    // Update Manager by employee *
+    // View employees by manager 
+    // Delete department 
     // Delete role
     // Delete employee
     // View total salary by department
