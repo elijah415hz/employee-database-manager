@@ -102,13 +102,12 @@ USE employee_tracker;
 -- ==========================================
 -- -- first show managers
 -- SELECT employee.id AS id, 
---         CONCAT(employee.first_name, " ", employee.last_name) AS name,
---         name as department, 
---         title, 
---         CONCAT(managers.first_name, " ", managers.last_name) AS manager
--- FROM department
--- INNER JOIN role ON department.id = role.department_id
--- INNER JOIN employee ON role.id = employee.role_id
--- INNER JOIN employee managers ON managers.id = employee.manager_id;
-
+--      CONCAT(employee.first_name, " ", employee.last_name) AS name,
+--      title
+--      FROM department
+--      INNER JOIN role ON department.id = role.department_id
+--      INNER JOIN employee manager ON role.id = manager.role_id
+--      INNER JOIN employee ON manager.id = employee.manager_id;
+-- -- Then get employees
+-- Use queries.getEmployeesBy {"employee.manager_id: answers.managerId"}
 -- source sql/queries.sql

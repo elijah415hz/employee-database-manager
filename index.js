@@ -24,7 +24,6 @@ const connection = mysql.createConnection({
 connection.connect(function (err) {
     if (err) throw err;
     init();
-    // console.log("connected as id " + connection.threadId + "\n");
 });
 
 //TODO: Inquirer Questions - Do with Async/Await
@@ -36,7 +35,7 @@ connection.connect(function (err) {
 // Add role *
 // Bonus:
 // Update Manager by employee *
-// View employees by manager 
+// View employees by manager *
 // Delete department 
 // Delete role
 // Delete employee

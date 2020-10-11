@@ -31,23 +31,13 @@ const viewEmployees = new Query(`SELECT employee.id AS id,
     FROM department
     INNER JOIN role ON department.id = role.department_id
     INNER JOIN employee ON role.id = employee.role_id
-    LEFT JOIN employee managers ON managers.id = employee.manager_id;`)
+    LEFT JOIN employee managers ON managers.id = employee.manager_id`)
 
 const viewDepartments = new Query('SELECT id, name AS department FROM department');
 
 const viewRoles = new Query('SELECT id, title FROM role');
 
-const viewEmployeesBy = new Query(`SELECT employee.id AS id, 
-    CONCAT(employee.first_name, " ", employee.last_name) as name, 
-    name as department, 
-    title, 
-    salary, 
-    CONCAT(managers.first_name, " ", managers.last_name) AS manager
-    FROM department
-    INNER JOIN role ON department.id = role.department_id
-    INNER JOIN employee ON role.id = employee.role_id
-    LEFT JOIN employee managers ON managers.id = employee.manager_id
-    WHERE ?;`)
+const viewEmployeesBy = new Query(viewEmployees.sqlString + " WHERE ?")
 
 const addEmployee = new Query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) 
     VALUES (?, ?, ?, ?);`);
