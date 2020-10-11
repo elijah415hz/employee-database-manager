@@ -46,6 +46,7 @@ async function init() {
             "View Employees by Department",
             "View Employees by Role",
             "Add Employee",
+            "Add Department",
             "Quit"
         ]
     })
@@ -62,84 +63,115 @@ async function init() {
         case "Add Employee":
             addEmployee();
             break;
+        case "Add Department":
+            addDepartment();
+            break;
         case "Quit":
             connection.end();
     }
 }
 
 async function viewAllEmployees() {
-    const employeesTable = await queries.viewEmployees.runQuery(connection)
-    console.table(employeesTable);
-        setTimeout(() => init(), 500);
+    try {
+        const employeesTable = await queries.viewEmployees.runQuery(connection)
+        console.table(employeesTable);
+    } catch (err) {
+        console.error(err);
+    }
+    setTimeout(() => init(), 500);
 }
 
 async function employeesByDepartment() {
-    const departmentTable = await queries.viewDepartments.runQuery(connection);
-    let choices = departmentTable.map(row => { return { name: row.department, value: row.id } });
-    const answers = await inquirer.prompt(
-        {
-            type: "list",
-            message: "Select Department",
-            name: "departmentId",
-            choices: choices
-        }
-    );
-    const employeesTable = await queries.viewEmployeesByDepartment.runQuery(connection, answers.departmentId)
-    console.table(employeesTable);
+    try {
+        const departmentTable = await queries.viewDepartments.runQuery(connection);
+        let choices = departmentTable.map(row => { return { name: row.department, value: row.id } });
+        const answers = await inquirer.prompt(
+            {
+                type: "list",
+                message: "Select Department",
+                name: "departmentId",
+                choices: choices
+            }
+        );
+        const employeesTable = await queries.viewEmployeesByDepartment.runQuery(connection, answers.departmentId)
+        console.table(employeesTable);
+    } catch (err) {
+        console.error(err);
+    }
     setTimeout(() => init(), 500);
 }
 
 async function employeesByRole() {
-    const rolesTable = await queries.viewRoles.runQuery(connection);
-    console.log(rolesTable)
-    let choices = rolesTable.map(row => { return { name: row.title, value: row.id } });
-    const answers = await inquirer.prompt(
-        {
-            type: "list",
-            message: "Select Title",
-            name: "roleId",
-            choices: choices
-        }
-    );
-    const employeesTable = await queries.viewEmployeesByRole.runQuery(connection, answers.roleId)
-    console.table(employeesTable);
+    try {
+        const rolesTable = await queries.viewRoles.runQuery(connection);
+        console.log(rolesTable)
+        let choices = rolesTable.map(row => { return { name: row.title, value: row.id } });
+        const answers = await inquirer.prompt(
+            {
+                type: "list",
+                message: "Select Title",
+                name: "roleId",
+                choices: choices
+            }
+        );
+        const employeesTable = await queries.viewEmployeesByRole.runQuery(connection, answers.roleId)
+        console.table(employeesTable);
+    } catch (err) {
+        console.error(err);
+    }
     setTimeout(() => init(), 500);
 }
 
 async function addEmployee() {
-    const rolesTable = await queries.viewRoles.runQuery(connection);
-    let roleChoices = rolesTable.map(row => { return { name: row.title, value: row.id } });
-    const departmentTable = await queries.viewDepartments.runQuery(connection);
-    let departmentChoices = departmentTable.map(row => { return { name: row.department, value: row.id } });
-    const managerTable = await queries.viewEmployees.runQuery(connection);
-    let managerChoices = managerTable.map(row => { return { name: row.name, value: row.id } });
-    managerChoices.unshift({name: "none", value: null})
-    const answers = await inquirer.prompt([
-        {
-            type: "input",
-            message: "First name",
-            name: "firstName",
+    try {
+        const rolesTable = await queries.viewRoles.runQuery(connection);
+        let roleChoices = rolesTable.map(row => { return { name: row.title, value: row.id } });
+        const managerTable = await queries.viewEmployees.runQuery(connection);
+        let managerChoices = managerTable.map(row => { return { name: row.name, value: row.id } });
+        managerChoices.unshift({ name: "none", value: null })
+        const answers = await inquirer.prompt([
+            {
+                type: "input",
+                message: "First name",
+                name: "firstName",
 
-        },
-        {
+            },
+            {
+                type: "input",
+                message: "Last name",
+                name: "lastName"
+            },
+            {
+                type: "list",
+                message: "Title",
+                name: "titleId",
+                choices: roleChoices
+            },
+            {
+                type: "list",
+                message: "Manager",
+                name: "managerId",
+                choices: managerChoices
+            }
+        ]);
+        queries.addEmployee.runQuery(connection, [answers.firstName, answers.lastName, answers.titleId, answers.managerId]);
+    } catch (err) {
+        console.error(err);
+    }
+    setTimeout(() => init(), 500);
+}
+
+async function addDepartment() {
+    try {
+        const answers = await inquirer.prompt({
             type: "input",
-            message: "Last name",
-            name: "lastName"
-        },
-        {
-            type: "list",
-            message: "Title",
-            name: "titleId",
-            choices: roleChoices
-        },
-        {
-            type: "list",
-            message: "Manager",
-            name: "managerId",
-            choices: managerChoices
-        }
-    ]);
-    queries.addEmployee.runQuery(connection, [answers.firstName, answers.lastName, answers.titleId, answers.managerId]);
+            message: "Department name:",
+            name: "departmentName"
+        });
+        queries.addDepartment.runQuery(connection, answers.departmentName);
+    } catch (err) {
+        console.error(error)
+    }
     setTimeout(() => init(), 500);
 }
 

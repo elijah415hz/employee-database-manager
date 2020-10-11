@@ -18,9 +18,9 @@ class Query {
                 }
             })
         })
-        // return promiseQuery;
     }
 }
+
 
 const viewEmployees = new Query(`SELECT employee.id AS id, 
     CONCAT(employee.first_name, " ", employee.last_name) as name, 
@@ -62,7 +62,10 @@ const viewEmployeesByRole = new Query(`SELECT employee.id AS id,
     WHERE role.id = ?;`)
 
 const addEmployee = new Query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) 
-    VALUES (?, ?, ?, ?);`)
+    VALUES (?, ?, ?, ?);`);
+
+const addDepartment = new Query(`INSERT INTO department (name) 
+VALUES (?);`)
 
 module.exports = {
     viewEmployees: viewEmployees,
@@ -70,5 +73,6 @@ module.exports = {
     viewEmployeesByDepartment: viewEmployeesByDepartment,
     viewRoles: viewRoles,
     viewEmployeesByRole: viewEmployeesByRole,
-    addEmployee: addEmployee
+    addEmployee: addEmployee,
+    addDepartment: addDepartment
 }
