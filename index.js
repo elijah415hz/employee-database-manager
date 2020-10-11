@@ -2,6 +2,7 @@ const inquirer = require("inquirer");
 const cTable = require("console.table");
 const queries = require("./js/queries");
 const figlet = require("figlet");
+const chalk = require("chalk")
 
 const mysql = require("mysql");
 
@@ -36,9 +37,9 @@ connection.connect(function (err) {
 // Bonus:
 // Update Manager by employee *
 // View employees by manager *
-// Delete department 
-// Delete role
-// Delete employee
+// Delete department *
+// Delete role *
+// Delete employee *
 // View total salary by department
 
 
@@ -57,6 +58,10 @@ async function init() {
             "Add Employee",
             "Add Department",
             "Add Role",
+            "Remove Department",
+            "Remove Role",
+            "Remove Employee",
+            "View Total Salary Budget by Department",
             "Quit"
         ]
     })
@@ -81,6 +86,18 @@ async function init() {
             break;
         case "Add Role":
             addRole();
+            break;
+        case "Remove Department":
+            removeDepartment();
+            break;
+        case "Remove Role":
+            removeRole();
+            break;
+        case "Remove Employee":
+            removeEmployee();
+            break;
+        case "View Total Salary Budget by Department":
+            totalBudgetByDepartment();
             break;
         case "Quit":
             connection.end();
@@ -109,11 +126,11 @@ async function employeesByDepartment() {
                 choices: choices
             }
         );
-        const employeesTable = await queries.viewEmployeesBy.runQuery(connection, {"department.id": answers.departmentId})
+        const employeesTable = await queries.viewEmployeesBy.runQuery(connection, { "department.id": answers.departmentId })
         if (employeesTable.length > 0) {
-        console.table(employeesTable);
+            console.table(employeesTable);
         } else {
-            console.log("No employees in this department")
+            console.log(chalk.red("No employees in this department"))
         }
     } catch (err) {
         console.error(err);
@@ -133,12 +150,12 @@ async function employeesByRole() {
                 choices: choices
             }
         );
-        const employeesTable = await queries.viewEmployeesBy.runQuery(connection, {"role.id": answers.roleId})
+        const employeesTable = await queries.viewEmployeesBy.runQuery(connection, { "role.id": answers.roleId })
         if (employeesTable.length > 0) {
             console.table(employeesTable);
-            } else {
-                console.log("No employees in this role")
-            }
+        } else {
+            console.log(chalk.red("No employees in this role"))
+        }
     } catch (err) {
         console.error(err);
     }
@@ -155,7 +172,7 @@ async function employeesByManager() {
             name: "managerId",
             choices: managerChoices
         })
-        const employeesByManager = await queries.viewEmployeesBy.runQuery(connection, {"employee.manager_id": answers.managerId})
+        const employeesByManager = await queries.viewEmployeesBy.runQuery(connection, { "employee.manager_id": answers.managerId })
         console.table(employeesByManager);
     } catch (err) {
         console.error(err);
@@ -195,8 +212,12 @@ async function addEmployee() {
                 choices: managerChoices
             }
         ]);
-        const successful = queries.addEmployee.runQuery(connection, [answers.firstName, answers.lastName, answers.titleId, answers.managerId]);
-        if (successful) console.log("Employee Added")
+        const successful = await queries.addEmployee.runQuery(connection, [answers.firstName, answers.lastName, answers.titleId, answers.managerId]);
+        if (successful.affectedRows > 0) {
+            console.log(chalk.green("Employee Added"))
+        } else {
+            console.log(chalk.red("Add Failed"))
+        }
 
     } catch (err) {
         console.error(err);
@@ -211,11 +232,15 @@ async function addDepartment() {
             message: "Department name:",
             name: "departmentName"
         });
-        const successful = queries.addDepartment.runQuery(connection, answers.departmentName);
-        if (successful) console.log("Department Added")
+        const successful = await queries.addDepartment.runQuery(connection, answers.departmentName);
+        if (successful.affectedRows > 0) {
+            console.log(chalk.green("Department Added"))
+        } else {
+            console.log(chalk.red("Add Failed"))
+        }
 
     } catch (err) {
-        console.error(error)
+        console.error(err)
     }
     setTimeout(() => init(), 500);
 }
@@ -243,10 +268,105 @@ async function addRole() {
                 name: "salary"
             }
         ]);
-        const successful = queries.addRole.runQuery(connection, [answers.title, answers.salary, answers.departmentId]);
-        if (successful) console.log("Role Added")
+        const successful = await queries.addRole.runQuery(connection, [answers.title, answers.salary, answers.departmentId]);
+        if (successful.affectedRows > 0) {
+            console.log(chalk.green("Role Added"));
+        } else {
+            console.log(chalk.red("Add Failed"))
+        }
     } catch (err) {
         console.error(error)
+    }
+    setTimeout(() => init(), 500);
+}
+
+async function removeDepartment() {
+    try {
+        const departmentTable = await queries.viewDepartments.runQuery(connection);
+        let departmentChoices = departmentTable.map(row => { return { name: row.department, value: row.id } });
+        const answers = await inquirer.prompt([
+            {
+                type: "list",
+                message: "Department:",
+                name: "departmentId",
+                choices: departmentChoices
+            }
+        ]);
+        const successful = await queries.deleteRowFrom.runQuery(connection, [`department`, { id: answers.departmentId }]);
+        if (successful.affectedRows > 0) {
+            console.log(chalk.green("Department Deleted"));
+        } else {
+            console.log(chalk.red("Delete Failed"))
+        }
+    } catch (err) {
+        console.error(err);
+    }
+    setTimeout(() => init(), 500);
+}
+
+async function removeRole() {
+    try {
+        const roleTable = await queries.viewRoles.runQuery(connection);
+        let roleChoices = roleTable.map(row => { return { name: row.title, value: row.id } });
+        const answers = await inquirer.prompt([
+            {
+                type: "list",
+                message: "Role:",
+                name: "roleId",
+                choices: roleChoices
+            }
+        ]);
+        const successful = await queries.deleteRowFrom.runQuery(connection, [`role`, { id: answers.roleId }]);
+        console.log(successful)
+        if (successful.affectedRows > 0) {
+            console.log(chalk.green("Role Deleted"));
+        } else {
+            console.log(chalk.red("Delete Failed"))
+        }
+    } catch (err) {
+        console.error(err);
+    }
+    setTimeout(() => init(), 500);
+}
+
+async function removeEmployee() {
+    try {
+        const employeeTable = await queries.viewEmployees.runQuery(connection);
+        let employeeChoices = employeeTable.map(row => { return { name: row.name, value: row.id } });
+        const answers = await inquirer.prompt([
+            {
+                type: "list",
+                message: "Employee:",
+                name: "employeeId",
+                choices: employeeChoices
+            }
+        ]);
+        const successful = await queries.deleteRowFrom.runQuery(connection, [`employee`, { id: answers.employeeId }]);
+        if (successful) {
+            console.log(chalk.green("Employee Deleted"));
+        }
+    } catch (err) {
+        console.error(err);
+    }
+    setTimeout(() => init(), 500);
+}
+
+async function totalBudgetByDepartment() {
+    try {
+        const departmentTable = await queries.viewDepartments.runQuery(connection);
+        let departmentChoices = departmentTable.map(row => { return { name: row.department, value: row.id } });
+        const answers = await inquirer.prompt([
+            {
+                type: "list",
+                message: "Department:",
+                name: "departmentId",
+                choices: departmentChoices
+            }
+        ]);
+        const totalBudget = await queries.budgetByDepartment.runQuery(connection, answers.departmentId);
+        console.log(chalk.green("Total Budget: $" + totalBudget[0].budget))
+    } catch (err) {
+        console.error(err);
     }
     setTimeout(() => init(), 500);
 }

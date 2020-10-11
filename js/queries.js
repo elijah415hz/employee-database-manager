@@ -1,6 +1,6 @@
 // const mysql = require("mysql");
 // const connection = require("./connection")
-const { promisify } = require("util")
+// const { promisify } = require("util")
 
 
 class Query {
@@ -60,6 +60,10 @@ const viewManagers = new Query(`SELECT DISTINCT manager.id AS id,
 const updateManagerForEmployee = new Query(`UPDATE employee SET manager_id = ? WHERE id = ?;
 `)
 
+const deleteRowFrom = new Query(`DELETE FROM ?? WHERE ?`)
+
+const budgetByDepartment = new Query(`SELECT SUM(salary) budget FROM role WHERE department_id = ? GROUP BY department_id`)
+
 module.exports = {
     viewEmployees: viewEmployees,
     viewDepartments: viewDepartments,
@@ -69,5 +73,7 @@ module.exports = {
     addDepartment: addDepartment,
     addRole: addRole,
     viewManagers: viewManagers,
-    updateManagerForEmployee: updateManagerForEmployee
+    updateManagerForEmployee: updateManagerForEmployee,
+    deleteRowFrom: deleteRowFrom,
+    budgetByDepartment: budgetByDepartment
 }
