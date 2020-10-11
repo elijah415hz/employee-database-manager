@@ -47,6 +47,7 @@ async function init() {
             "View Employees by Role",
             "Add Employee",
             "Add Department",
+            "Add Role",
             "Quit"
         ]
     })
@@ -65,6 +66,9 @@ async function init() {
             break;
         case "Add Department":
             addDepartment();
+            break;
+        case "Add Role":
+            addRole();
             break;
         case "Quit":
             connection.end();
@@ -94,7 +98,11 @@ async function employeesByDepartment() {
             }
         );
         const employeesTable = await queries.viewEmployeesByDepartment.runQuery(connection, answers.departmentId)
-        console.table(employeesTable);
+        if (employeesTable.length > 0) {
+        console.log(employeesTable);
+        } else {
+            console.log("No employees in this department")
+        }
     } catch (err) {
         console.error(err);
     }
@@ -104,7 +112,6 @@ async function employeesByDepartment() {
 async function employeesByRole() {
     try {
         const rolesTable = await queries.viewRoles.runQuery(connection);
-        console.log(rolesTable)
         let choices = rolesTable.map(row => { return { name: row.title, value: row.id } });
         const answers = await inquirer.prompt(
             {
@@ -115,7 +122,11 @@ async function employeesByRole() {
             }
         );
         const employeesTable = await queries.viewEmployeesByRole.runQuery(connection, answers.roleId)
-        console.table(employeesTable);
+        if (employeesTable.length > 0) {
+            console.table(employeesTable);
+            } else {
+                console.log("No employees in this role")
+            }
     } catch (err) {
         console.error(err);
     }
@@ -154,7 +165,9 @@ async function addEmployee() {
                 choices: managerChoices
             }
         ]);
-        queries.addEmployee.runQuery(connection, [answers.firstName, answers.lastName, answers.titleId, answers.managerId]);
+        const successful = queries.addEmployee.runQuery(connection, [answers.firstName, answers.lastName, answers.titleId, answers.managerId]);
+        if (successful) console.log("Employee Added")
+
     } catch (err) {
         console.error(err);
     }
@@ -168,7 +181,40 @@ async function addDepartment() {
             message: "Department name:",
             name: "departmentName"
         });
-        queries.addDepartment.runQuery(connection, answers.departmentName);
+        const successful = queries.addDepartment.runQuery(connection, answers.departmentName);
+        if (successful) console.log("Department Added")
+
+    } catch (err) {
+        console.error(error)
+    }
+    setTimeout(() => init(), 500);
+}
+
+async function addRole() {
+    try {
+        const departmentTable = await queries.viewDepartments.runQuery(connection);
+        let departmentChoices = departmentTable.map(row => { return { name: row.department, value: row.id } });
+
+        const answers = await inquirer.prompt([
+            {
+                type: "list",
+                message: "Department:",
+                name: "departmentId",
+                choices: departmentChoices
+            },
+            {
+                type: "input",
+                message: "Title",
+                name: "title"
+            },
+            {
+                type: "number",
+                message: "salary",
+                name: "salary"
+            }
+        ]);
+        const successful = queries.addRole.runQuery(connection, [answers.title, answers.salary, answers.departmentId]);
+        if (successful) console.log("Role Added")
     } catch (err) {
         console.error(error)
     }

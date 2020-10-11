@@ -65,7 +65,10 @@ const addEmployee = new Query(`INSERT INTO employee (first_name, last_name, role
     VALUES (?, ?, ?, ?);`);
 
 const addDepartment = new Query(`INSERT INTO department (name) 
-VALUES (?);`)
+    VALUES (?);`)
+
+const addRole = new Query(`INSERT INTO role (title, salary, department_id) 
+    VALUES (?, ?, ?);`)
 
 module.exports = {
     viewEmployees: viewEmployees,
@@ -74,5 +77,6 @@ module.exports = {
     viewRoles: viewRoles,
     viewEmployeesByRole: viewEmployeesByRole,
     addEmployee: addEmployee,
-    addDepartment: addDepartment
+    addDepartment: addDepartment,
+    addRole: addRole
 }
