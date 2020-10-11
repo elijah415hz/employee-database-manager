@@ -58,8 +58,8 @@ USE employee_tracker;
 -- ================================
 -- -- Use dropdowns for department, manager, role. Once selected...
 -- -- TODO: Figure out how to only add manager column if manager selected
--- INSERT INTO employee (first_name, last_name, role_id, null) 
---     VALUES ("Kathy", "Birmble", 4, null);
+-- INSERT INTO employee (first_name, last_name, role_id, department, manager) 
+--     VALUES (?, ?, ?, ?);
 -- ====================================
 
 -- Add Department
@@ -85,7 +85,7 @@ USE employee_tracker;
 -- ====================================
 --  -- First show Employees
 -- SELECT employee.id AS id, 
---         CONCAT(employee.first_name, " ", employee.last_name) AS employee,
+--         CONCAT(employee.first_name, " ", employee.last_name) AS name,
 --         name as department, 
 --         title, 
 --         CONCAT(managers.first_name, " ", managers.last_name) AS manager
@@ -97,5 +97,18 @@ USE employee_tracker;
 -- UPDATE employee SET manager_id = ${managerId} WHERE id = ${employeeId};
 -- ====================================
 
+
+-- View employees by manager
+-- ==========================================
+-- -- first show managers
+-- SELECT employee.id AS id, 
+--         CONCAT(employee.first_name, " ", employee.last_name) AS name,
+--         name as department, 
+--         title, 
+--         CONCAT(managers.first_name, " ", managers.last_name) AS manager
+-- FROM department
+-- INNER JOIN role ON department.id = role.department_id
+-- INNER JOIN employee ON role.id = employee.role_id
+-- INNER JOIN employee managers ON managers.id = employee.manager_id;
 
 -- source sql/queries.sql

@@ -1,8 +1,17 @@
 const inquirer = require("inquirer");
 const cTable = require("console.table");
 const queries = require("./js/queries");
+const figlet = require("figlet");
 
 const mysql = require("mysql");
+
+console.log(figlet.textSync('Employee Tracker', {
+    font: 'Standard',
+    horizontalLayout: 'default',
+    verticalLayout: 'full',
+    width: 80,
+    whitespaceBreak: true
+}));
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -45,6 +54,7 @@ async function init() {
             "View all Employees",
             "View Employees by Department",
             "View Employees by Role",
+            "View Employees by Manager",
             "Add Employee",
             "Add Department",
             "Add Role",
@@ -60,6 +70,9 @@ async function init() {
             break;
         case "View Employees by Role":
             employeesByRole();
+            break;
+        case "View Employees by Manager":
+            employeesByManager();
             break;
         case "Add Employee":
             addEmployee();
@@ -97,9 +110,9 @@ async function employeesByDepartment() {
                 choices: choices
             }
         );
-        const employeesTable = await queries.viewEmployeesByDepartment.runQuery(connection, answers.departmentId)
+        const employeesTable = await queries.viewEmployeesBy.runQuery(connection, {"department.id": answers.departmentId})
         if (employeesTable.length > 0) {
-        console.log(employeesTable);
+        console.table(employeesTable);
         } else {
             console.log("No employees in this department")
         }
@@ -121,12 +134,30 @@ async function employeesByRole() {
                 choices: choices
             }
         );
-        const employeesTable = await queries.viewEmployeesByRole.runQuery(connection, answers.roleId)
+        const employeesTable = await queries.viewEmployeesBy.runQuery(connection, {"role.id": answers.roleId})
         if (employeesTable.length > 0) {
             console.table(employeesTable);
             } else {
                 console.log("No employees in this role")
             }
+    } catch (err) {
+        console.error(err);
+    }
+    setTimeout(() => init(), 500);
+}
+
+async function employeesByManager() {
+    try {
+        const managers = await queries.viewManagers.runQuery(connection);
+        let managerChoices = managers.map(row => { return { name: row.name, value: row.id } });
+        const answers = await inquirer.prompt({
+            type: "list",
+            message: "Select Manager:",
+            name: "managerId",
+            choices: managerChoices
+        })
+        const employeesByManager = await queries.viewEmployeesBy.runQuery(connection, {"employee.manager_id": answers.managerId})
+        console.table(employeesByManager);
     } catch (err) {
         console.error(err);
     }
@@ -220,4 +251,8 @@ async function addRole() {
     }
     setTimeout(() => init(), 500);
 }
+
+
+
+
 
