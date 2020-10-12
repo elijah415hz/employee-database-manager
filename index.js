@@ -284,7 +284,7 @@ async function removeDepartment() {
     try {
         const departmentTable = await queries.viewDepartments.runQuery(connection);
         let departmentChoices = departmentTable.map(row => { return { name: row.department, value: row.id } });
-        const answers = await inquirer.prompt([
+        var answers = await inquirer.prompt([
             {
                 type: "list",
                 message: "Department:",
@@ -299,7 +299,11 @@ async function removeDepartment() {
             console.log(chalk.red("Delete Failed"))
         }
     } catch (err) {
-        console.error(err);
+        if (/ER_ROW_IS_REFERENCED/.test(err.message)) {
+            console.log(chalk.red("You cannot delete departments containing active roles and employees. \nTo delete this department, first delete all employees and roles within this department."));
+        } else {
+            console.error(err)
+        }
     }
     setTimeout(() => init(), 500);
 }
@@ -324,7 +328,11 @@ async function removeRole() {
             console.log(chalk.red("Delete Failed"))
         }
     } catch (err) {
-        console.error(err);
+        if (/ER_ROW_IS_REFERENCED/.test(err.message)) {
+            console.log(chalk.red("You cannot delete roles containing active employees. \nTo delete this role, first delete all employees within this role."));
+        } else {
+            console.error(err)
+        }
     }
     setTimeout(() => init(), 500);
 }
@@ -346,7 +354,11 @@ async function removeEmployee() {
             console.log(chalk.green("Employee Deleted"));
         }
     } catch (err) {
-        console.error(err);
+        if (/ER_ROW_IS_REFERENCED/.test(err.message)) {
+            console.log(chalk.red("You cannot delete managers with subordinates. \nTo delete this manager, first assign all of their subordinates to different manager."));
+        } else {
+            console.error(err)
+        }
     }
     setTimeout(() => init(), 500);
 }

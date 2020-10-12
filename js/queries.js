@@ -37,6 +37,8 @@ const viewDepartments = new Query('SELECT id, name AS department FROM department
 
 const viewRoles = new Query('SELECT id, title FROM role');
 
+const viewRolesBy = new Query('SELECT id, title FROM role WHERE ?');
+
 const viewEmployeesBy = new Query(viewEmployees.sqlString + " WHERE ?")
 
 const addEmployee = new Query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) 
@@ -68,6 +70,7 @@ module.exports = {
     viewEmployees: viewEmployees,
     viewDepartments: viewDepartments,
     viewRoles: viewRoles,
+    viewRolesBy: viewRolesBy,
     viewEmployeesBy: viewEmployeesBy,
     addEmployee: addEmployee,
     addDepartment: addDepartment,

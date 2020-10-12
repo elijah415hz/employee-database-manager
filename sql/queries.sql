@@ -110,4 +110,14 @@ USE employee_tracker;
 --      INNER JOIN employee ON manager.id = employee.manager_id;
 -- -- Then get employees
 -- Use queries.getEmployeesBy {"employee.manager_id: answers.managerId"}
+-- ===============================================
+
+-- Delete department
+-- ============================================
+-- DELETE * FROM ? WHERE ?;
+
+
+
+
+
 -- source sql/queries.sql
