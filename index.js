@@ -5,6 +5,7 @@ const queries = require("./js/queries");
 const figlet = require("figlet");
 const chalk = require("chalk")
 const mysql = require("mysql");
+const { updateManagerForEmployee } = require("./js/queries");
 
 // Display banner on launch
 console.log(figlet.textSync('Employee Tracker', {
@@ -43,6 +44,8 @@ async function init() {
             "Add Employee",
             "Add Department",
             "Add Role",
+            "Update Employee Role",
+            "Update Employee Manager",
             "Remove Employee",
             "Remove Department",
             "Remove Role",
@@ -72,6 +75,12 @@ async function init() {
             break;
         case "Add Role":
             addRole();
+            break;
+        case "Update Employee Role":
+            updateEmployeeRole();
+            break;
+        case "Update Employee Manager":
+            updateEmployeeManager();
             break;
         case "Remove Department":
             removeDepartment();
@@ -124,7 +133,7 @@ async function employeesByDepartment() {
         // If the query returned any employees, log them
         if (employeesTable.length > 0) {
             console.table(employeesTable);
-        // Otherwise, let the user know that the department is empty
+            // Otherwise, let the user know that the department is empty
         } else {
             console.log(chalk.red("No employees in this department"))
         }
@@ -220,7 +229,7 @@ async function addEmployee() {
         // If the query succesfully inserted values, let the user know
         if (successful.affectedRows > 0) {
             console.log(chalk.green("Employee Added"))
-        // Otherwise, let the user know that it failed
+            // Otherwise, let the user know that it failed
         } else {
             console.log(chalk.red("Add Failed"))
         }
@@ -289,6 +298,72 @@ async function addRole() {
     setTimeout(() => init(), 500);
 }
 
+async function updateEmployeeRole() {
+    try {
+        // Get list of employees
+        const employeesTable = await queries.viewEmployees.runQuery(connection);
+        const employeeChoices = employeesTable.map(row => { return { name: row.name, value: row.id } })
+        // Get list of roles
+        const roleTable = await queries.viewRoles.runQuery(connection);
+        const roleChoices = roleTable.map(row => { return { name: row.title, value: row.id } });
+        const answer = await inquirer.prompt([
+            {
+                type: "list",
+                message: "Employee:",
+                name: "employeeId",
+                choices: employeeChoices
+            },
+            {
+                type: "list",
+                message: "New Role",
+                name: "roleId",
+                choices: roleChoices
+            }
+        ])
+        const successful = await queries.updateForEmployee.runQuery(connection, [{ role_id: answer.roleId}, {id: answer.employeeId }])
+        if (successful.affectedRows > 0) {
+            console.log(chalk.green("Role Updated"));
+        } else {
+            console.log(chalk.red("Update Failed"))
+        }
+    } catch (err) {
+        console.error(err)
+    }
+    setTimeout(() => init(), 500);
+
+}
+
+async function updateEmployeeManager() {
+    try {
+        // Get list of employees/potential managers
+        const employeesTable = await queries.viewEmployees.runQuery(connection);
+        const employeeChoices = employeesTable.map(row => { return { name: row.name, value: row.id } })
+        const answer1 = await inquirer.prompt([
+            {
+                type: "list",
+                message: "Employee:",
+                name: "employeeId",
+                choices: employeeChoices
+            }])
+        const managerChoices = employeeChoices.filter(row => row.value != answer1.employeeId)
+        const answer2 = await inquirer.prompt({
+            type: "list",
+            message: "New Manager:",
+            name: "managerId",
+            choices: managerChoices
+        })
+        const successful = await queries.updateForEmployee.runQuery(connection, [{ manager_id: answer2.managerId}, {id: answer1.employeeId }])
+        if (successful.affectedRows > 0) {
+            console.log(chalk.green("Manager Updated"));
+        } else {
+            console.log(chalk.red("Update Failed"))
+        }
+    } catch (err) {
+        console.error(err)
+    }
+    setTimeout(() => init(), 500);
+}
+
 // Ask user which department, then attempt to delete it
 async function removeDepartment() {
     try {
@@ -314,7 +389,7 @@ async function removeDepartment() {
         // If MYSQL throws an error containing 'ER_ROW_IS_REFERENCED' let the user know that the department can't be deleted
         if (/ER_ROW_IS_REFERENCED/.test(err.message)) {
             console.log(chalk.red("You cannot delete departments containing active roles and employees. \nTo delete this department, first delete all employees and roles within this department."));
-        // If there is any other type of error thrown, just log the error
+            // If there is any other type of error thrown, just log the error
         } else {
             console.error(err)
         }

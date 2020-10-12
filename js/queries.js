@@ -58,7 +58,7 @@ const viewManagers = new Query(`SELECT DISTINCT manager.id AS id,
     INNER JOIN employee manager ON role.id = manager.role_id
     INNER JOIN employee ON manager.id = employee.manager_id;`)
 // Assign a new manager id for a specified employee id
-const updateManagerForEmployee = new Query(`UPDATE employee SET manager_id = ? WHERE id = ?;
+const updateForEmployee = new Query(`UPDATE employee SET ? WHERE ?;
 `)
 // Delete from a supplied table where a supplied condition is met
 const deleteRowFrom = new Query(`DELETE FROM ?? WHERE ?`)
@@ -78,7 +78,7 @@ module.exports = {
     addDepartment: addDepartment,
     addRole: addRole,
     viewManagers: viewManagers,
-    updateManagerForEmployee: updateManagerForEmployee,
+    updateForEmployee: updateForEmployee,
     deleteRowFrom: deleteRowFrom,
     budgetByDepartment: budgetByDepartment
 }
