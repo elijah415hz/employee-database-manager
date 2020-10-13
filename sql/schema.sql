@@ -25,4 +25,4 @@ CREATE TABLE employee (
     FOREIGN KEY (manager_id) REFERENCES employee(id)
 );
 
-source seeds.sql
+-- source seeds.sql

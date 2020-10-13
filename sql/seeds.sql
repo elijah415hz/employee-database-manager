@@ -1,7 +1,5 @@
 USE employee_tracker;
 
-USE employee_tracker;
-
 INSERT INTO department(name) VALUES("Sales"), ("Production"), ("Human Resources");
 INSERT INTO role(title, salary, department_id) 
 VALUES("Sales Manager", 90000, 1),
