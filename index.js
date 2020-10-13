@@ -5,7 +5,6 @@ const queries = require("./js/queries");
 const figlet = require("figlet");
 const chalk = require("chalk")
 const mysql = require("mysql");
-const { updateManagerForEmployee } = require("./js/queries");
 
 // Display banner on launch
 console.log(figlet.textSync('Employee Tracker', {
